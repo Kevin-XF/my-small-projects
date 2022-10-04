@@ -1,0 +1,376 @@
+#include <stdio.h>
+#include <time.h>
+#include <graphics.h>
+#include<windows.h>
+#include<math.h>
+#include <conio.h>
+
+#define up 72
+#define down 80
+#define left 75
+#define right 77
+
+/*
+* 预期功能：1.自选召唤师技能，点燃闪现疾跑
+* 2.玩家控制一个球
+*/
+//形成方块并且指定位置大小
+void putpoint(int x, int y, int color, int len) {
+	int i, j;
+	for (i = -len; i <= len; i++) {
+		for (j = -len; j <= len; j++) {
+			putpixel(x + i, y + j, color);
+		}
+	}
+}
+
+void fire(int x0, int y0) {
+
+}
+
+
+double distance(int x0, int y0, int x1, int y1) {
+
+	return sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
+
+}
+
+//判断能否进行闪现
+int FlashJudge(int x0, int y0, int x1, int y1) {
+	if (distance(x0, y0, x1, y1) <= 50) {
+		return 1;
+	}
+	else return 0;
+}
+
+
+int main() {
+	int choice = 0;
+	while (choice != 4){
+	
+	printf("please choose your Summoner Spells: 1.Flash  2.Ignite  3.Ghost 4.exit\n");
+	printf("Flash:choose one of the four directions to flash\n");
+	printf("Ignite:make the other stop for 5 seconds\n");
+	printf("Ghost:speed up\n");
+	scanf_s("%d", &choice);
+	Sleep(100);
+
+	srand(time(0));
+	initgraph(1100, 700);
+
+	int i;
+	int x0 = rand() % 1100, y0 = rand() % 700;
+	int x1 = rand() % 1100, y1 = rand() % 700;
+	int cdFlash = 100;//闪现cd
+	int cdFlashMine = 100;//我的闪现cd
+	int cdIgnite = 100;//点燃cd
+	int cd1 = 100; //黄球能量
+	int flag_1 = 0;//疾跑开关
+	int flag_0 = 0;//闪现开关
+	int a1 = 1000;
+	int b1 = 1000;//被追小球的移动速度
+	int beilv = 1;
+
+	switch (choice)
+	{
+	case 1:
+
+		while (1) {
+
+
+			int color0 = GREEN;
+			if (cdFlash >= 100) color0 = LIGHTGREEN;//闪现可用，亮绿色
+			putpoint(x0, y0, color0, 5);
+
+			if (cdFlashMine >= 100) {
+				putpoint(x1, y1, MAGENTA, 5);
+			}
+			else {
+				int L = 5;
+				int color1 = YELLOW;
+				putpoint(x1, y1, YELLOW, 5);
+			}
+
+
+			if (FlashJudge(x0, y0, x1, y1) && cdFlash >= 100) {
+				putpoint(x0, y0, BLUE, 5);
+				x0 = rand() % 1100, y0 = rand() % 700;  //闪现不好用函数写出来，不改了
+				cdFlash = 0;
+			}
+			cdFlash++; if (cdFlash >= 100)cdFlash = 100;
+
+			if (distance(x0, y0, x1, y1) <= 10) { break; }
+
+
+			Sleep(100);
+			putpoint(x0, y0, RED, 5); putpoint(x1, y1, LIGHTGRAY, 5);
+
+
+			int a = rand() % 3 - 1;
+			int b = rand() % 3 - 1;
+			x0 += a * 10; y0 += b * 10;
+			if (x0 < 0)x0 = 1100;  if (x0 > 1100)x0 = 0;
+			if (y0 < 0)y0 = 700;	  if (y0 > 700)y0 = 0;
+
+
+			char userkey = 0;
+			a = 10;
+			b = 10;
+			
+			if (_kbhit()) {
+
+				userkey = _getch();
+				switch (userkey) {
+				case up: {
+					y1 -= b;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case down: {
+					y1 += b;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case left: {
+					x1 -= a;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case right: {
+					x1 += a;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case 49: {
+					if (cdFlashMine >= 100) {
+						putpoint(x1, y1, LIGHTGRAY, 5);
+						x1 -= (x1 - x0) * 0.5;
+						y1 -= (y1 - y0) * 0.5;
+						putpoint(x1, y1, YELLOW, 5);
+						cdFlashMine = 0;
+					}
+					else continue;
+				}
+				}
+			}
+			cdFlashMine++;
+
+
+			if (x1 < 0)x1 = 1100;  if (x1 > 1100)x1 = 0;
+			if (y1 < 0)y1 = 700;	  if (y1 > 700)y1 = 0;
+
+			continue;
+
+
+		}
+	case 2:
+	{
+
+		while (1) {
+
+
+			int color0 = GREEN;
+			if (cdFlash >= 100) color0 = LIGHTGREEN;//闪现可用，亮绿色
+			putpoint(x0, y0, color0, 5);
+
+			
+			if (cdIgnite >= 100) {
+				putpoint(x1, y1, MAGENTA, 5);
+				cdIgnite = 100;
+			}
+			else {
+				int L = 5;
+				int color1 = YELLOW;
+				putpoint(x1, y1, YELLOW, 5);
+			}
+			
+
+
+			if (FlashJudge(x0, y0, x1, y1) && cdFlash >= 100) {
+				putpoint(x0, y0, BLUE, 5);
+				x0 = rand() % 1100, y0 = rand() % 700;  //闪现不好用函数写出来，不改了
+				cdFlash = 0;
+			}
+			cdFlash++; if (cdFlash >= 100)cdFlash = 100;
+
+			if (distance(x0, y0, x1, y1) <= 10) { break; }
+
+
+			Sleep(100);
+			putpoint(x0, y0, RED, 5); putpoint(x1, y1, LIGHTGRAY, 5);
+
+
+			int a = rand() % 3 - 1;
+			int b = rand() % 3 - 1;
+			a1++; b1++;
+			if (a1 >= 1000)a1 = 1000;
+			if (b1 >= 1000)b1 = 1000;
+			x0 += a * a1*0.01; y0 += b * b1*0.01;
+			if (x0 < 0)x0 = 1100;  if (x0 > 1100)x0 = 0;
+			if (y0 < 0)y0 = 700;	  if (y0 > 700)y0 = 0;
+
+
+			char userkey = 0;
+			a = 10;
+			b = 10;
+
+			
+			cdIgnite++;
+			if (_kbhit()) {
+
+				userkey = _getch();
+				switch (userkey) {
+				case up: {
+					y1 -= b;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case down: {
+					y1 += b;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case left: {
+					x1 -= a;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case right: {
+					x1 += a;
+					putpoint(x1, y1, YELLOW, 5);
+					break;
+				}
+				case 49: {
+					if (cdIgnite >= 100){
+					putpoint(x1, y1, LIGHTGRAY, 5);
+					putpoint(x1, y1, YELLOW, 5);
+					a1 = 500;
+					b1 = 500;
+					cdIgnite = 0;
+					}
+				}
+			
+				}
+				}
+			}
+			
+
+
+			if (x1 < 0)x1 = 1100;  if (x1 > 1100)x1 = 0;
+			if (y1 < 0)y1 = 700;	  if (y1 > 700)y1 = 0;
+
+
+		}
+	
+		getchar();
+
+		//cd1 flag_1
+	case 3: {
+		while(1){
+		int color0 = GREEN;
+		if (cdFlash >= 100) color0 = LIGHTGREEN;//闪现可用，亮绿色
+		putpoint(x0, y0, color0, 5);
+
+		if (cd1 >= 100) {
+			putpoint(x1, y1, MAGENTA, 5);
+			cd1 = 100;
+		}
+		else {
+			int L = 5;
+			int color1 = YELLOW;
+			putpoint(x1, y1, YELLOW, 5);
+		}
+
+
+		if (FlashJudge(x0, y0, x1, y1) && cdFlash >= 100) {
+			putpoint(x0, y0, BLUE, 5);
+			x0 = rand() % 1100, y0 = rand() % 700;  //闪现不好用函数写出来，不改了
+			cdFlash = 0;
+		}
+		cdFlash++; if (cdFlash >= 100)cdFlash = 100;
+
+		if (distance(x0, y0, x1, y1) <= 10) { break; }
+
+
+		Sleep(100);
+		putpoint(x0, y0, RED, 5); putpoint(x1, y1, LIGHTGRAY, 5);
+
+
+		int a = rand() % 3 - 1;
+		int b = rand() % 3 - 1;
+		x0 += a * 10; y0 += b * 10;
+		if (x0 < 0)x0 = 1100;  if (x0 > 1100)x0 = 0;
+		if (y0 < 0)y0 = 700;	  if (y0 > 700)y0 = 0;
+
+		char userkey = 0;
+		a = 10;
+		b = 10;
+
+		if (_kbhit()) {
+
+			userkey = _getch();
+			switch (userkey) {
+			case up: {
+				y1 -= b * beilv;
+				putpoint(x1, y1, YELLOW, 5);
+				break;
+			}
+			case down: {
+				y1 += b * beilv;
+				putpoint(x1, y1, YELLOW, 5);
+				break;
+			}
+			case left: {
+				x1 -= a * beilv;
+				putpoint(x1, y1, YELLOW, 5);
+				break;
+			}
+			case right: {
+				x1 += a * beilv;
+				putpoint(x1, y1, YELLOW, 5);
+				break;
+			}
+			case 49: {
+				if (cd1 >= 100 && flag_1 == 0) flag_1 = 1;
+				if (flag_1 == 1 && cd1 > 0)
+				{
+					beilv = 2;
+					cd1--;
+					if (cd1 == 0)flag_1 = 0;//能量耗尽，关掉疾跑
+				}
+				else
+				{
+					cd1++; if (cd1 > 100)cd1 = 100;
+					beilv = 1;
+				}
+			}
+
+			}
+		}
+		if (flag_1 == 1 && cd1 > 0)
+		{
+			cd1--;
+			if (cd1 == 0)flag_1 = 0;//能量耗尽，关掉疾跑
+		}
+		else
+		{
+			cd1++; if (cd1 > 100)cd1 = 100;
+			beilv = 1;
+		}
+	}
+	}
+		if (x1 < 0)x1 = 1100;  if (x1 > 1100)x1 = 0;
+		if (y1 < 0)y1 = 700;	  if (y1 > 700)y1 = 0;
+
+		getchar();
+	case 4: {
+		return 0;
+	}
+	}
+	
+	}
+	}
+	
+
+
+
